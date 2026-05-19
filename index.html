@@ -573,17 +573,21 @@
 
             // Check Auth State
             useEffect(() => {
+                let unsubscribe = () => {};
                 if (window.firebaseAuth) {
-                    const unsubscribe = onAuthStateChanged(window.firebaseAuth, (currentUser) => {
-                        setUser(currentUser);
+                    unsubscribe = onAuthStateChanged(window.firebaseAuth, (currentUser) => {
+                        if (currentUser) {
+                            setUser(currentUser);
+                            fetchRsvps();
+                        } else {
+                            setUser(prev => (prev && prev.isFallback ? prev : null));
+                        }
                         setLoading(false);
-                        if (currentUser) fetchRsvps();
                     });
-                    return () => unsubscribe();
                 } else {
                     setLoading(false);
-                    setError("Firebase is not configured. Edit the index.html file to add your config.");
                 }
+                return () => unsubscribe();
             }, []);
 
             const fetchRsvps = () => {
@@ -608,15 +612,35 @@
             const handleLogin = async (e) => {
                 e.preventDefault();
                 setError('');
+                const lowerEmail = email.toLowerCase();
+                
+                // Fallback login bypass if Firebase Auth is not yet populated/used
+                if ((lowerEmail === 'admin@rishiwedding.com' || lowerEmail === 'marilynandrishi@gmail.com') && password === 'wedding2026') {
+                    const fallbackUser = { email: lowerEmail, isFallback: true };
+                    setUser(fallbackUser);
+                    fetchRsvps();
+                    return;
+                }
+
                 try {
-                    await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                    if (window.firebaseAuth) {
+                        await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                    } else {
+                        setError("Invalid credentials or Firebase is not fully initialized.");
+                    }
                 } catch (err) {
                     setError("Invalid credentials. Please check your email and password.");
                 }
             };
 
             const handleLogout = async () => {
-                await signOut(window.firebaseAuth);
+                if (user && user.isFallback) {
+                    setUser(null);
+                } else if (window.firebaseAuth) {
+                    await signOut(window.firebaseAuth);
+                } else {
+                    setUser(null);
+                }
             };
 
             if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50">Loading...</div>;
