@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rishi & Marilyn - Wedding RSVP</title>
+    <title>Marilyn & Rishi - Wedding RSVP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -86,6 +86,22 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .animate-bounce-bar1 {
+            transform-origin: bottom;
+            animation: bounceBar 0.8s ease-in-out infinite alternate;
+        }
+        .animate-bounce-bar2 {
+            transform-origin: bottom;
+            animation: bounceBar 0.5s ease-in-out infinite alternate 0.15s;
+        }
+        .animate-bounce-bar3 {
+            transform-origin: bottom;
+            animation: bounceBar 0.7s ease-in-out infinite alternate 0.3s;
+        }
+        @keyframes bounceBar {
+            0% { transform: scaleY(0.3); }
+            100% { transform: scaleY(1.3); }
+        }
     </style>
 </head>
 <body>
@@ -127,9 +143,9 @@
     </script>
 
     <script type="text/babel" data-type="module">
-        import React, { useState, useEffect } from 'react';
+        import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { MapPin, Clock, Heart, ChefHat, Wine, Bed, Plane, CheckCircle, Users, LogOut, Lock } from 'lucide-react';
+        import { MapPin, Clock, Heart, ChefHat, Wine, Bed, Plane, CheckCircle, Users, LogOut, Lock, Church, PartyPopper, Calendar, Car, Info, Music, Volume2, VolumeX, ChevronDown, Hotel } from 'lucide-react';
         import { push, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
         import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
@@ -146,10 +162,12 @@
 
                     <div className="relative z-10 max-w-lg w-full text-center mt-0">
                         <div className="mb-8">
-                            <span className="font-cinzel text-xs tracking-[0.3em] uppercase text-slate-500">Welcome to our wedding invite</span>
+                            <span className="font-cinzel text-xs tracking-[0.2em] uppercase text-slate-500 font-semibold block leading-relaxed px-4">
+                                WELCOME TO THE WEDDING OF MARILYN & RISHI
+                            </span>
                             <h1 className="font-playfair text-5xl md:text-6xl mt-2 leading-tight text-slate-800 italic">Our Wedding</h1>
                             <div className="mt-8 font-script text-6xl md:text-7xl text-slate-800 drop-shadow-sm">
-                                Rishi & Marilyn
+                                Marilyn & Rishi
                             </div>
                         </div>
 
@@ -178,9 +196,9 @@
 
         function ScheduleSection() {
             const events = [
-                { time: "2:00 PM", title: "Ceremony", desc: "St. Peter the Apostle", icon: Heart },
+                { time: "2:00 PM", title: "Ceremony", desc: "St. Peter the Apostle", icon: Church },
                 { time: "6:00 PM - 7:00 PM", title: "Cocktail Hour", desc: "Il Villaggio", icon: Wine },
-                { time: "7:00 PM - 11:00 PM", title: "Reception", desc: "Il Villaggio", icon: ChefHat },
+                { time: "7:00 PM - 11:00 PM", title: "Reception", desc: "Il Villaggio", icon: PartyPopper },
             ];
 
             return (
@@ -218,31 +236,132 @@
 
         function DetailsTravelSection() {
             return (
-                <div id="travel" className="bg-transparent py-24 px-4">
-                    <div className="max-w-6xl mx-auto">
+                <div id="travel" className="bg-transparent py-24 px-4 relative overflow-hidden">
+                    <div className="max-w-6xl mx-auto relative z-10">
                         <div className="text-center mb-16">
                             <h2 className="font-playfair text-4xl text-slate-800 italic">Travel & Details</h2>
                         </div>
                         
                         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                             {/* Ceremony */}
-                            <div className="glass-panel p-8 rounded-2xl text-center">
-                                <MapPin className="w-8 h-8 text-slate-600 mx-auto mb-4" />
-                                <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-3">Ceremony</h3>
-                                <p className="font-playfair text-xl text-slate-900 mb-2">St. Peter the Apostle</p>
-                                <p className="text-slate-600 text-sm mb-4">94 Somerset St<br/>New Brunswick, NJ 08901</p>
+                            <div className="glass-panel p-8 rounded-2xl text-center flex flex-col justify-between hover:shadow-lg transition-shadow">
+                                <div>
+                                    <Church className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-3 text-slate-500">Ceremony</h3>
+                                    <p className="font-playfair text-xl text-slate-900 mb-2">St. Peter the Apostle</p>
+                                    <p className="text-slate-600 text-sm mb-4">94 Somerset St<br/>New Brunswick, NJ 08901</p>
+                                </div>
+                                <a 
+                                    href="https://maps.google.com/?q=St.+Peter+the+Apostle,+94+Somerset+St,+New+Brunswick,+NJ+08901" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="inline-block mt-4 text-xs font-cinzel text-slate-700 hover:text-slate-900 tracking-widest uppercase border border-slate-350 px-4 py-2 rounded-full hover:bg-slate-50 transition-colors"
+                                >
+                                    Get Directions
+                                </a>
                             </div>
 
                             {/* Reception */}
-                            <div className="glass-panel p-8 rounded-2xl text-center">
-                                <Wine className="w-8 h-8 text-slate-600 mx-auto mb-4" />
-                                <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-3">Reception</h3>
-                                <p className="font-playfair text-xl text-slate-900 mb-2">Il Villaggio</p>
-                                <p className="text-slate-600 text-sm mb-4">651 NJ-17 N<br/>Carlstadt, NJ 07072</p>
+                            <div className="glass-panel p-8 rounded-2xl text-center flex flex-col justify-between hover:shadow-lg transition-shadow">
+                                <div>
+                                    <PartyPopper className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-3 text-slate-500">Reception</h3>
+                                    <p className="font-playfair text-xl text-slate-900 mb-2">Il Villaggio</p>
+                                    <p className="text-slate-600 text-sm mb-4">651 NJ-17 N<br/>Carlstadt, NJ 07072</p>
+                                </div>
+                                <a 
+                                    href="https://maps.google.com/?q=Il+Villaggio,+651+NJ-17+N,+Carlstadt,+NJ+07072" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="inline-block mt-4 text-xs font-cinzel text-slate-700 hover:text-slate-900 tracking-widest uppercase border border-slate-350 px-4 py-2 rounded-full hover:bg-slate-50 transition-colors"
+                                >
+                                    Get Directions
+                                </a>
                             </div>
 
+                            {/* Accommodations */}
+                            <div className="glass-panel p-8 rounded-2xl text-center flex flex-col justify-between hover:shadow-lg transition-shadow">
+                                <div>
+                                    <Hotel className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-3 text-slate-500">Accommodations</h3>
+                                    <p className="font-playfair text-xl text-slate-900 mb-2">Element by Marriott New York Wood-Ridge</p>
+                                    <p className="text-slate-600 text-sm mb-2">379 Route 17 South<br/>Wood-Ridge, NJ 07075</p>
+                                    <p className="text-xs text-slate-500 italic mt-3 leading-relaxed">
+                                        For out-of-town guests, please call them this week or use the link below to ask for our discounted rate.
+                                    </p>
+                                </div>
+                                <div className="mt-4 space-y-2">
+                                    <a 
+                                        href="https://www.marriott.com/reservation/rateListMenu.mi?gbraid=0AAAAAo3SzG4pP_J40REDK_LX2al-ohsO5Rishi" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="block text-xs font-cinzel bg-slate-800 text-white hover:bg-slate-700 tracking-widest uppercase px-4 py-2 rounded-full transition-colors"
+                                    >
+                                        Book Discounted Rate
+                                    </a>
+                                    <a 
+                                        href="https://maps.google.com/?q=Element+by+Marriott+New+York+Wood-Ridge,+379+Route+17+South,+Wood-Ridge,+NJ+07075" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="block text-xs font-cinzel text-slate-700 hover:text-slate-900 tracking-widest uppercase border border-slate-350 px-4 py-2 rounded-full hover:bg-slate-50 transition-colors"
+                                    >
+                                        Get Directions
+                                    </a>
+                                </div>
+                            </div>
 
+                            {/* Transportation */}
+                            <div className="glass-panel p-8 rounded-2xl text-center flex flex-col justify-between hover:shadow-lg transition-shadow">
+                                <div>
+                                    <Car className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-3 text-slate-500">Transportation</h3>
+                                    <p className="font-playfair text-xl text-slate-900 mb-2">Shuttle & Travel</p>
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        For guests staying at the Element by Marriott New York Wood-Ridge, you may get to Il Villaggio via Uber.
+                                    </p>
+                                    <p className="text-xs font-semibold text-slate-700 mt-4 bg-slate-100 inline-block px-3 py-1 rounded-full border border-slate-200">
+                                        ⏱️ Under 4-minute drive
+                                    </p>
+                                </div>
+                                <a 
+                                    href="https://uber.com" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="inline-block mt-4 text-xs font-cinzel text-slate-700 hover:text-slate-900 tracking-widest uppercase border border-slate-350 px-4 py-2 rounded-full hover:bg-slate-50 transition-colors"
+                                >
+                                    Open Uber
+                                </a>
+                            </div>
                         </div>
+
+                        {/* Dress Code Sub-Section */}
+                        <div className="max-w-4xl mx-auto mt-16 glass-panel p-8 md:p-12 rounded-2xl text-center hover:shadow-lg transition-shadow">
+                            <span className="font-cinzel text-xs tracking-[0.2em] uppercase text-slate-500 mb-2 block">What to Wear</span>
+                            <h3 className="font-playfair text-3xl text-slate-800 italic mb-6">Dress Code</h3>
+                            <p className="text-slate-600 max-w-2xl mx-auto leading-relaxed mb-8">
+                                We’ve done our best to make this celebration beautiful, and we’d be delighted if you wore <strong className="text-slate-800 font-semibold">formal attire and pastels</strong> to complement our wedding.
+                            </p>
+                            
+                            {/* Color Swatches */}
+                            <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+                                {[
+                                    { name: "Blush Pink", hex: "#F5D6D6" },
+                                    { name: "Dusty Blue", hex: "#D4E2EC" },
+                                    { name: "Sage Green", hex: "#D2E0D8" },
+                                    { name: "Soft Lavender", hex: "#E3D5E7" },
+                                    { name: "Warm Peach", hex: "#F3E3D3" }
+                                ].map((swatch, idx) => (
+                                    <div key={idx} className="flex flex-col items-center">
+                                        <div 
+                                            className="w-12 h-12 rounded-full shadow-md border-2 border-white hover:scale-110 transition-transform duration-300"
+                                            style={{ backgroundColor: swatch.hex }}
+                                        />
+                                        <span className="font-cinzel text-[10px] tracking-widest text-slate-500 uppercase mt-2">{swatch.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             );
@@ -253,7 +372,9 @@
                 name: '',
                 email: '',
                 attending: 'yes',
-                guests: '1',
+                plusOnes: '0',
+                plusOneName1: '',
+                plusOneName2: '',
                 meal: 'beef',
                 dietary: ''
             });
@@ -276,6 +397,7 @@
                         const rsvpRef = ref(window.firebaseDb, 'rsvps');
                         await push(rsvpRef, {
                             ...formData,
+                            guests: 1 + parseInt(formData.plusOnes || 0), // Maintain total guests count for compatibility in Dashboard
                             timestamp: new Date().toISOString()
                         });
                         setIsSuccess(true);
@@ -301,7 +423,8 @@
                     <div className="max-w-2xl mx-auto relative z-10">
                         <div className="text-center mb-12">
                             <h2 className="font-playfair text-4xl text-slate-800 italic mb-4">RSVP</h2>
-                            <p className="font-cinzel text-xs tracking-widest text-slate-500 uppercase">Please respond by August 19th</p>
+                            <p className="font-cinzel text-xs tracking-widest text-slate-500 uppercase mb-2">Kindly Respond by Sunday, July 19th 2026</p>
+                            <p className="font-playfair text-sm text-slate-600 italic mt-2">“We respectfully request an adults-only celebration.”</p>
                         </div>
 
                         <div className="glass-panel p-8 md:p-12 rounded-2xl shadow-xl bg-slate-50 border border-slate-200">
@@ -341,15 +464,66 @@
 
                                         {formData.attending === 'yes' && (
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Total Guests</label>
+                                                <label className="block text-sm font-medium text-slate-700 mb-1">Plus One(s)</label>
                                                 <div className="flex items-center w-full p-1 rounded-lg border border-slate-300 bg-white focus-within:ring-2 focus-within:ring-slate-400 focus-within:border-slate-400 transition-all">
-                                                    <button type="button" onClick={() => setFormData(prev => ({...prev, guests: Math.max(1, parseInt(prev.guests || 1) - 1).toString()}))} className="w-10 h-10 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors font-bold text-lg">-</button>
-                                                    <input type="number" name="guests" value={formData.guests} onChange={handleChange} min="1" className="flex-1 text-center font-medium text-slate-800 outline-none bg-transparent" />
-                                                    <button type="button" onClick={() => setFormData(prev => ({...prev, guests: (parseInt(prev.guests || 1) + 1).toString()}))} className="w-10 h-10 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors font-bold text-lg">+</button>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setFormData(prev => ({...prev, plusOnes: Math.max(0, parseInt(prev.plusOnes || 0) - 1).toString()}))} 
+                                                        className="w-10 h-10 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors font-bold text-lg"
+                                                    >-</button>
+                                                    <input 
+                                                        type="text" 
+                                                        readOnly 
+                                                        name="plusOnes" 
+                                                        value={formData.plusOnes} 
+                                                        className="flex-1 text-center font-medium text-slate-800 outline-none bg-transparent cursor-default" 
+                                                    />
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setFormData(prev => ({...prev, plusOnes: Math.min(2, parseInt(prev.plusOnes || 0) + 1).toString()}))} 
+                                                        className="w-10 h-10 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors font-bold text-lg"
+                                                    >+</button>
                                                 </div>
+                                                <p className="text-xs text-slate-500 mt-1">Select up to 2 additional guests.</p>
                                             </div>
                                         )}
                                     </div>
+
+                                    {formData.attending === 'yes' && parseInt(formData.plusOnes || 0) > 0 && (
+                                        <div className="p-6 bg-slate-100 rounded-xl border border-slate-200 mt-4 space-y-4">
+                                            <h4 className="font-cinzel text-sm font-bold tracking-widest uppercase text-slate-800">Plus One Name(s)</h4>
+                                            
+                                            {parseInt(formData.plusOnes) >= 1 && (
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Plus One Full Name</label>
+                                                    <input 
+                                                        type="text" 
+                                                        name="plusOneName1" 
+                                                        required 
+                                                        value={formData.plusOneName1} 
+                                                        onChange={handleChange} 
+                                                        className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition-all bg-white" 
+                                                        placeholder="First & Last Name" 
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {parseInt(formData.plusOnes) === 2 && (
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Additional Guest Full Name</label>
+                                                    <input 
+                                                        type="text" 
+                                                        name="plusOneName2" 
+                                                        required 
+                                                        value={formData.plusOneName2} 
+                                                        onChange={handleChange} 
+                                                        className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none transition-all bg-white" 
+                                                        placeholder="First & Last Name" 
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {formData.attending === 'yes' && (
                                         <div className="p-6 bg-slate-100 rounded-xl border border-slate-200 mt-4">
@@ -502,7 +676,7 @@
                             </div>
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
                                 <div className="p-3 bg-green-50 text-green-600 rounded-xl"><CheckCircle className="w-6 h-6" /></div>
-                                <div><p className="text-slate-500 text-sm font-medium">Total Attending (Guests)</p><p className="text-2xl font-bold">{totalYes}</p></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Total Attending (Headcount)</p><p className="text-2xl font-bold">{totalYes}</p></div>
                             </div>
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
                                 <div className="p-3 bg-red-50 text-red-600 rounded-xl"><Lock className="w-6 h-6" /></div>
@@ -518,9 +692,9 @@
                                             <th className="p-4 font-semibold text-sm text-slate-600">Date</th>
                                             <th className="p-4 font-semibold text-sm text-slate-600">Name</th>
                                             <th className="p-4 font-semibold text-sm text-slate-600">Status</th>
-                                            <th className="p-4 font-semibold text-sm text-slate-600">Guests</th>
+                                            <th className="p-4 font-semibold text-sm text-slate-600">Plus Ones</th>
                                             <th className="p-4 font-semibold text-sm text-slate-600">Meal</th>
-                                            <th className="p-4 font-semibold text-sm text-slate-600">Notes</th>
+                                            <th className="p-4 font-semibold text-sm text-slate-600">Notes & Plus Ones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -539,9 +713,20 @@
                                                             {rsvp.attending === 'yes' ? 'Attending' : 'Declined'}
                                                         </span>
                                                     </td>
-                                                    <td className="p-4 text-sm text-slate-600">{rsvp.attending === 'yes' ? rsvp.guests : '-'}</td>
+                                                    <td className="p-4 text-sm text-slate-600">
+                                                        {rsvp.attending === 'yes' ? (rsvp.plusOnes && parseInt(rsvp.plusOnes) > 0 ? `+${rsvp.plusOnes}` : '0') : '-'}
+                                                    </td>
                                                     <td className="p-4 text-sm text-slate-600 capitalize">{rsvp.attending === 'yes' ? rsvp.meal : '-'}</td>
-                                                    <td className="p-4 text-sm text-slate-600 max-w-xs truncate" title={rsvp.dietary}>{rsvp.dietary || '-'}</td>
+                                                    <td className="p-4 text-sm text-slate-600">
+                                                        {rsvp.attending === 'yes' && rsvp.plusOnes && parseInt(rsvp.plusOnes) > 0 && (
+                                                            <div className="text-xs text-slate-700 font-semibold mb-1">
+                                                                Plus Ones: {[rsvp.plusOneName1, rsvp.plusOneName2].filter(Boolean).join(", ")}
+                                                            </div>
+                                                        )}
+                                                        <div className="text-xs text-slate-500 max-w-xs truncate" title={rsvp.dietary}>
+                                                            {rsvp.dietary || '-'}
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             ))
                                         )}
@@ -557,6 +742,189 @@
         // ==========================================
         // MAIN APP COMPONENT / ROUTER
         // ==========================================
+
+        function FaqSection() {
+            const faqs = [
+                {
+                    q: "What time should we arrive at the church ceremony?",
+                    a: "We recommend arriving at least 30 minutes before the wedding ceremony begins to give you enough time to find your seat and settle in."
+                },
+                {
+                    q: "Are kids allowed at the wedding festivities?",
+                    a: "We love your little ones; however, due to space limitations, our wedding festivities will be adults only. We truly appreciate your understanding."
+                },
+                {
+                    q: "Is parking available at St. Peter’s the Apostle Church?",
+                    a: "Yes, there is a church parking lot as well as street parking available. Please note that parking may be limited, so we encourage guests to allow extra time for arrival."
+                },
+                {
+                    q: "Is parking available at Il Villaggio?",
+                    a: "Yes, ample valet parking will be available for guests at the reception."
+                },
+                {
+                    q: "Are the ceremony and reception indoors or outdoors?",
+                    a: "Both the ceremony and reception will be indoors."
+                }
+            ];
+
+            const [activeIndex, setActiveIndex] = useState(null);
+
+            return (
+                <div id="faq" className="py-24 px-4 bg-transparent border-t border-slate-100">
+                    <div className="max-w-3xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="font-playfair text-4xl text-slate-800 italic">Frequently Asked Questions</h2>
+                        </div>
+                        <div className="space-y-4">
+                            {faqs.map((faq, idx) => {
+                                const isOpen = activeIndex === idx;
+                                return (
+                                    <div key={idx} className="glass-panel rounded-2xl overflow-hidden transition-all duration-300">
+                                        <button
+                                            onClick={() => setActiveIndex(isOpen ? null : idx)}
+                                            className="w-full px-6 py-5 text-left flex justify-between items-center hover:bg-slate-50/50 transition-colors focus:outline-none"
+                                        >
+                                            <span className="font-playfair text-lg md:text-xl text-slate-800 pr-4">{faq.q}</span>
+                                            <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''}`} />
+                                        </button>
+                                        <div className={`transition-all duration-300 overflow-hidden ${isOpen ? 'max-h-40 border-t border-slate-100 bg-white/40' : 'max-h-0'}`}>
+                                            <p className="px-6 py-5 text-slate-600 leading-relaxed text-sm md:text-base">{faq.a}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function RsvpCallToAction() {
+            return (
+                <div className="py-16 bg-slate-900 text-center relative overflow-hidden px-4">
+                    <div className="relative z-10 max-w-2xl mx-auto">
+                        <p className="font-playfair text-2xl md:text-3xl text-white italic mb-6">
+                            Kindly Respond by Sunday, July 19th 2026
+                        </p>
+                        <a 
+                            href="#rsvp" 
+                            className="inline-block bg-white hover:bg-slate-100 text-slate-900 font-cinzel text-xs font-bold tracking-widest uppercase px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+                        >
+                            RSVP HERE
+                        </a>
+                    </div>
+                </div>
+            );
+        }
+
+        function CountdownSection() {
+            const targetDate = new Date("2026-09-19T14:00:00").getTime();
+            const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, isOver: false });
+
+            useEffect(() => {
+                const calculateTime = () => {
+                    const now = new Date().getTime();
+                    const difference = targetDate - now;
+
+                    if (difference <= 0) {
+                        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isOver: true });
+                        return;
+                    }
+
+                    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                    setTimeLeft({ days, hours, minutes, seconds, isOver: false });
+                };
+
+                calculateTime();
+                const interval = setInterval(calculateTime, 1000);
+                return () => clearInterval(interval);
+            }, []);
+
+            if (timeLeft.isOver) {
+                return (
+                    <div className="py-16 bg-slate-50 text-center border-t border-slate-100">
+                        <h3 className="font-playfair text-3xl italic text-slate-800">The Celebration is Here!</h3>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="py-16 bg-slate-50 border-t border-slate-100 relative overflow-hidden">
+                    <div className="max-w-4xl mx-auto text-center relative z-10 px-4">
+                        <h2 className="font-playfair text-3xl text-slate-800 italic mb-8">Counting Down to the Big Day</h2>
+                        <div className="grid grid-cols-4 gap-4 max-w-lg mx-auto">
+                            {[
+                                { label: "Days", value: timeLeft.days },
+                                { label: "Hours", value: timeLeft.hours },
+                                { label: "Minutes", value: timeLeft.minutes },
+                                { label: "Seconds", value: timeLeft.seconds }
+                            ].map((item, idx) => (
+                                <div key={idx} className="glass-panel p-4 rounded-xl flex flex-col justify-center items-center shadow-sm">
+                                    <span className="font-playfair text-3xl md:text-4xl text-slate-800 font-bold">{String(item.value).padStart(2, '0')}</span>
+                                    <span className="font-cinzel text-[10px] text-slate-500 uppercase tracking-wider mt-1">{item.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function MusicPlayer() {
+            const [isPlaying, setIsPlaying] = useState(false);
+            const audioRef = useRef(null);
+
+            useEffect(() => {
+                audioRef.current = new Audio('./background-music.mp3');
+                audioRef.current.loop = true;
+                return () => {
+                    if (audioRef.current) {
+                        audioRef.current.pause();
+                    }
+                };
+            }, []);
+
+            const togglePlay = () => {
+                if (!audioRef.current) return;
+                if (isPlaying) {
+                    audioRef.current.pause();
+                    setIsPlaying(false);
+                } else {
+                    audioRef.current.play()
+                        .then(() => setIsPlaying(true))
+                        .catch(err => console.error("Playback blocked/failed:", err));
+                }
+            };
+
+            return (
+                <div className="fixed bottom-6 right-6 z-50 flex items-center space-x-2">
+                    {!isPlaying && (
+                        <div className="hidden md:block bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] uppercase tracking-widest font-semibold px-3 py-2 rounded-full border border-slate-200 shadow-md">
+                            🎵 Play Music
+                        </div>
+                    )}
+                    <button
+                        onClick={togglePlay}
+                        className={`flex items-center justify-center w-12 h-12 rounded-full shadow-lg border transition-all duration-300 ${isPlaying ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'}`}
+                        title={isPlaying ? "Pause Music" : "Play Music"}
+                    >
+                        {isPlaying ? (
+                            <div className="flex items-end justify-center space-x-0.5 h-4 w-4">
+                                <span className="w-0.5 h-3 bg-white rounded-full animate-bounce-bar1"></span>
+                                <span className="w-0.5 h-4 bg-white rounded-full animate-bounce-bar2"></span>
+                                <span className="w-0.5 h-2 bg-white rounded-full animate-bounce-bar3"></span>
+                            </div>
+                        ) : (
+                            <Music size={20} className="text-slate-600 animate-pulse" />
+                        )}
+                    </button>
+                </div>
+            );
+        }
 
         function App() {
             const [isAdminRoute, setIsAdminRoute] = useState(window.location.hash === '#admin');
@@ -579,6 +947,7 @@
                             <a href="#schedule" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">Schedule</a>
                             <a href="#travel" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">Details</a>
                             <a href="#rsvp" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">RSVP</a>
+                            <a href="#faq" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">FAQ</a>
                         </div>
                     </nav>
 
@@ -586,10 +955,14 @@
                     <ScheduleSection />
                     <DetailsTravelSection />
                     <RsvpSection />
+                    <FaqSection />
+                    <RsvpCallToAction />
+                    <CountdownSection />
+                    <MusicPlayer />
                     
-                    <footer className="bg-slate-900 py-12 text-center text-slate-400">
+                    <footer className="bg-slate-950 py-12 text-center text-slate-400">
                         <p className="font-cinzel text-xs tracking-[0.3em] uppercase mb-4 text-slate-300">
-                            Rishi & Marilyn
+                            Marilyn & Rishi
                         </p>
                         <p className="text-xs mb-8">September 19, 2026</p>
                         <a href="#admin" className="text-[10px] uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity">Admin Login</a>
