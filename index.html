@@ -912,7 +912,35 @@
             useEffect(() => {
                 audioRef.current = new Audio('./background-music.mp3');
                 audioRef.current.loop = true;
+
+                const startAutoplay = () => {
+                    if (audioRef.current) {
+                        audioRef.current.play()
+                            .then(() => {
+                                setIsPlaying(true);
+                                removeListeners();
+                            })
+                            .catch(err => {
+                                console.log("Autoplay waiting for user gesture...");
+                            });
+                    }
+                };
+
+                const removeListeners = () => {
+                    document.removeEventListener('click', startAutoplay);
+                    document.removeEventListener('touchstart', startAutoplay);
+                    document.removeEventListener('scroll', startAutoplay);
+                };
+
+                document.addEventListener('click', startAutoplay);
+                document.addEventListener('touchstart', startAutoplay);
+                document.addEventListener('scroll', startAutoplay);
+
+                // Initial try (works if browser has already white-listed permission)
+                startAutoplay();
+
                 return () => {
+                    removeListeners();
                     if (audioRef.current) {
                         audioRef.current.pause();
                     }
