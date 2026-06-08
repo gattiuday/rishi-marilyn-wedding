@@ -411,7 +411,7 @@
                     }
                 } catch (error) {
                     console.error("Error submitting RSVP:", error);
-                    setErrorMsg("There was an error saving your RSVP. Please try again.");
+                    setErrorMsg("There was an error saving your RSVP (" + error.message + "). Please try again.");
                 } finally {
                     setIsSubmitting(false);
                 }
