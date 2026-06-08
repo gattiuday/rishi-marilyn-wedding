@@ -926,6 +926,7 @@
         function MusicPlayer() {
             const [isPlaying, setIsPlaying] = useState(false);
             const playerRef = useRef(null);
+            const userPausedRef = useRef(false);
 
             useEffect(() => {
                 let player;
@@ -985,6 +986,7 @@
 
                 // Autoplay trigger on user interaction
                 const startAutoplay = () => {
+                    if (userPausedRef.current) return;
                     if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
                         try {
                             const state = playerRef.current.getPlayerState();
@@ -1016,9 +1018,11 @@
                 if (isPlaying) {
                     playerRef.current.pauseVideo();
                     setIsPlaying(false);
+                    userPausedRef.current = true;
                 } else {
                     playerRef.current.playVideo();
                     setIsPlaying(true);
+                    userPausedRef.current = false;
                 }
             };
 
