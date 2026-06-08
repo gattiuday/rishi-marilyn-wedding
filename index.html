@@ -606,23 +606,24 @@
                 e.preventDefault();
                 setError('');
                 const lowerEmail = email.toLowerCase();
-                
-                // Fallback login bypass if Firebase Auth is not yet populated/used
-                if ((lowerEmail === 'admin@rishiwedding.com' || lowerEmail === 'marilynandrishi@gmail.com') && password === 'wedding2026') {
-                    const fallbackUser = { email: lowerEmail, isFallback: true };
-                    setUser(fallbackUser);
-                    fetchRsvps();
-                    return;
-                }
 
                 try {
                     if (window.firebaseAuth) {
+                        // Attempt real Firebase authentication first
                         await signInWithEmailAndPassword(window.firebaseAuth, email, password);
                     } else {
-                        setError("Invalid credentials or Firebase is not fully initialized.");
+                        throw new Error("Firebase Auth is not initialized.");
                     }
                 } catch (err) {
-                    setError("Invalid credentials. Please check your email and password.");
+                    console.warn("Firebase Auth sign-in failed, checking fallback:", err);
+                    // Check if credentials match the fallback bypass
+                    if ((lowerEmail === 'admin@rishiwedding.com' || lowerEmail === 'marilynandrishi@gmail.com') && password === 'wedding2026') {
+                        const fallbackUser = { email: lowerEmail, isFallback: true };
+                        setUser(fallbackUser);
+                        fetchRsvps();
+                    } else {
+                        setError("Invalid credentials. Please check your email and password.");
+                    }
                 }
             };
 
