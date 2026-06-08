@@ -960,6 +960,9 @@
                                 rel: 0
                             },
                             events: {
+                                onReady: (event) => {
+                                    event.target.playVideo();
+                                },
                                 onStateChange: (event) => {
                                     if (event.data === window.YT.PlayerState.PLAYING) {
                                         setIsPlaying(true);
@@ -977,7 +980,28 @@
 
                 loadYT();
 
+                // Autoplay trigger on user interaction
+                const startAutoplay = () => {
+                    if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
+                        try {
+                            const state = playerRef.current.getPlayerState();
+                            if (state !== 1) {
+                                playerRef.current.playVideo();
+                            }
+                        } catch (e) {
+                            playerRef.current.playVideo();
+                        }
+                    }
+                };
+
+                document.addEventListener('click', startAutoplay);
+                document.addEventListener('touchstart', startAutoplay);
+                document.addEventListener('scroll', startAutoplay);
+
                 return () => {
+                    document.removeEventListener('click', startAutoplay);
+                    document.removeEventListener('touchstart', startAutoplay);
+                    document.removeEventListener('scroll', startAutoplay);
                     if (player && typeof player.destroy === 'function') {
                         player.destroy();
                     }
