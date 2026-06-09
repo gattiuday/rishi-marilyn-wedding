@@ -159,14 +159,11 @@
                 <div className="relative min-h-screen flex flex-col items-center justify-start p-4 pt-[300px] pb-20 fade-in overflow-hidden bg-transparent">
                     <div className="relative z-10 max-w-lg w-full text-center mt-0">
                         <div className="mb-8">
-                            <span className="font-cinzel text-xs tracking-[0.2em] uppercase text-slate-500 font-semibold block leading-relaxed px-4">
-                                WELCOME TO OUR WEDDING
-                            </span>
-                            <h1 className="font-playfair text-5xl md:text-6xl mt-2 leading-tight text-slate-800 italic">
-                                Rishi & Marilyn
+                            <h1 className="font-playfair text-5xl md:text-6xl mt-2 leading-tight text-slate-800 italic px-4">
+                                Welcome to our wedding
                             </h1>
-                            <div className="mt-8 font-script text-6xl md:text-7xl text-slate-800 drop-shadow-sm">
-                                The Couple
+                            <div className="mt-8 font-script text-5xl md:text-6xl text-slate-800 drop-shadow-sm">
+                                Rishi & Marilyn
                             </div>
                         </div>
 
@@ -417,7 +414,6 @@
                             <h2 className="font-playfair text-4xl text-slate-800 italic mb-4">RSVP</h2>
                             <p className="font-cinzel text-xs tracking-widest text-slate-800 uppercase font-bold mb-2">Kindly Respond by Sunday, July 19th 2026</p>
                             <p className="font-playfair text-sm text-slate-700 italic font-bold mt-2">“We respectfully request an adults-only celebration.”</p>
-                            <p className="font-playfair text-sm text-slate-700 italic font-bold mt-2">“We kindly request no boxed gifts.”</p>
                         </div>
 
                         <div className="glass-panel p-8 md:p-12 rounded-2xl shadow-xl bg-slate-50 border border-slate-200">
@@ -741,6 +737,39 @@
         // MAIN APP COMPONENT / ROUTER
         // ==========================================
 
+        function HoneymoonFundSection() {
+            return (
+                <div id="registry" className="py-24 px-4 bg-transparent border-t border-slate-100">
+                    <div className="max-w-3xl mx-auto text-center relative z-10">
+                        <div className="mb-12">
+                            <h2 className="font-playfair text-4xl text-slate-800 italic">Honeymoon Fund</h2>
+                        </div>
+                        <div className="glass-panel p-8 md:p-12 rounded-2xl shadow-lg bg-white/80 border border-slate-200 max-w-2xl mx-auto">
+                            <p className="text-slate-650 leading-relaxed mb-8 font-montserrat text-sm md:text-base">
+                                Your presence and blessings are the greatest gift we could ask for. If you wish to honor us with a gift, we kindly request no boxed gifts. Contributions via Venmo or Zelle toward our future together would be greatly appreciated.
+                            </p>
+                            
+                            <div className="border-t border-slate-200 pt-6 mb-8">
+                                <p className="font-script text-3xl text-slate-800 mb-1">With love and gratitude,</p>
+                                <p className="font-cinzel text-xs font-bold tracking-widest text-slate-700 uppercase">Rishi & Marilyn</p>
+                            </div>
+
+                            <div className="grid sm:grid-cols-2 gap-4 max-w-md mx-auto pt-2">
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/60 shadow-sm flex flex-col justify-center items-center">
+                                    <span className="font-cinzel text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Venmo</span>
+                                    <span className="font-montserrat text-base font-bold text-slate-850">@Rishi-Kumaran</span>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/60 shadow-sm flex flex-col justify-center items-center">
+                                    <span className="font-cinzel text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Zelle</span>
+                                    <span className="font-montserrat text-base font-bold text-slate-850">201-983-9744</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
 
 
         function FaqSection() {
@@ -1025,6 +1054,7 @@
                             <a href="#schedule" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">Schedule</a>
                             <a href="#travel" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">Details</a>
                             <a href="#rsvp" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">RSVP</a>
+                            <a href="#registry" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">Registry</a>
                             <a href="#faq" className="font-cinzel text-xs font-bold tracking-widest text-slate-600 hover:text-slate-900 uppercase">FAQ</a>
                         </div>
                     </nav>
@@ -1033,6 +1063,7 @@
                     <ScheduleSection />
                     <DetailsTravelSection />
                     <RsvpSection />
+                    <HoneymoonFundSection />
                     <FaqSection />
                     <RsvpCallToAction />
                     <CountdownSection />
