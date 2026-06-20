@@ -37,13 +37,13 @@
     <script type="importmap">
         {
           "imports": {
-            "react": "https://esm.sh/react@18.2.0",
-            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-            "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+            "react": "https://cdn.jsdelivr.net/npm/react@18.2.0/+esm",
+            "react-dom/client": "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/client/+esm",
+            "lucide-react": "https://cdn.jsdelivr.net/npm/lucide-react@0.263.1/+esm"
           }
         }
     </script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
     <style>
         body {
             background-color: #fcfcfc;
@@ -105,16 +105,26 @@
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <!-- Fallback UI displayed if Babel, React, or CDNs fail to load -->
+        <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center" style="background-color: #fcfcfc; background-image: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('./floral_pattern.png'); background-repeat: repeat; background-size: 300px; background-attachment: fixed;">
+            <div class="w-16 h-16 text-slate-400 mb-6 animate-pulse">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A11.952 11.952 0 0 1 12 10.5c-2.998 0-5.74 1.1-7.843 2.918M3.284 9.082A8.959 8.959 0 0 0 3 12c0 .778.099 1.533.284 2.253" />
+                </svg>
+            </div>
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 1.75rem; font-style: italic; font-weight: 500; color: #1e293b; margin-bottom: 0.75rem;">Loading Invitation...</h2>
+            <p style="font-family: 'Montserrat', sans-serif; font-size: 0.875rem; color: #64748b; max-width: 24rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                We are preparing the wedding details for you. If this takes more than a few seconds, please verify your internet connection or disable any strict adblockers/trackers.
+            </p>
+            <noscript>
+                <p style="color: #ef4444; font-weight: bold; font-family: 'Montserrat', sans-serif;">JavaScript is required to view this wedding invitation.</p>
+            </noscript>
+        </div>
+    </div>
     
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getDatabase, ref, push, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-
-        // ==========================================
-        // FIREBASE CONFIGURATION - UPDATE THESE KEYS
-        // ==========================================
+        // Initialize Firebase safely using dynamic imports to catch loading blockages
         const firebaseConfig = {
             apiKey: "AIzaSyCSaQIJnmyy92OQdcqAz_QYJTi9Voy60vM",
             authDomain: "rishi-wedding.firebaseapp.com",
@@ -126,29 +136,38 @@
             measurementId: "G-PXJ0ZEDDS7"
         };
 
-        // Initialize Firebase safely (will fail gracefully if keys are placeholder)
-        let app, database, auth;
-        try {
-            if(firebaseConfig.apiKey !== "YOUR_API_KEY") {
-                app = initializeApp(firebaseConfig);
-                database = getDatabase(app);
-                auth = getAuth(app);
-            }
-        } catch (e) {
-            console.error("Firebase Initialization Error:", e);
-        }
+        async function initFirebase() {
+            try {
+                if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
+                    const { getDatabase, ref, push, onValue } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js');
+                    const { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
 
-        // Expose Firebase instances globally for React to use
-        window.firebaseDb = database;
-        window.firebaseAuth = auth;
+                    const app = initializeApp(firebaseConfig);
+                    const database = getDatabase(app);
+                    const auth = getAuth(app);
+
+                    // Expose globally
+                    window.firebaseDb = database;
+                    window.firebaseAuth = auth;
+                    window.firebaseDbFunctions = { ref, push, onValue };
+                    window.firebaseAuthFunctions = { signInWithEmailAndPassword, onAuthStateChanged, signOut };
+                }
+            } catch (e) {
+                console.error("Firebase Initialization Error:", e);
+            }
+        }
+        initFirebase();
     </script>
 
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
         import { MapPin, Clock, Heart, ChefHat, Wine, Bed, Plane, CheckCircle, Users, LogOut, Lock, Church, PartyPopper, Calendar, Car, Info, Music, Volume2, VolumeX, ChevronDown, Hotel } from 'lucide-react';
-        import { push, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
-        import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        // Safely extract Firebase functions or fall back if Firebase fails to load/is blocked
+        const { ref, push, onValue } = window.firebaseDbFunctions || {};
+        const { signInWithEmailAndPassword, onAuthStateChanged, signOut } = window.firebaseAuthFunctions || {};
 
         // ==========================================
         // COMPONENTS
@@ -847,7 +866,7 @@
         }
 
         function CountdownSection() {
-            const targetDate = new Date("2026-09-19T14:00:00").getTime();
+            const targetDate = new Date(2026, 8, 19, 14, 0, 0).getTime();
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, isOver: false });
 
             useEffect(() => {
