@@ -391,6 +391,8 @@
                 plusOnes: '0',
                 plusOneName1: '',
                 plusOneName2: '',
+                attendingCeremony: true,
+                attendingReception: true,
                 dietary: ''
             });
             const [isSubmitting, setIsSubmitting] = useState(false);
@@ -398,8 +400,8 @@
             const [errorMsg, setErrorMsg] = useState('');
 
             const handleChange = (e) => {
-                const { name, value } = e.target;
-                setFormData(prev => ({ ...prev, [name]: value }));
+                const { name, value, type, checked } = e.target;
+                setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
             };
 
             const handleSubmit = async (e) => {
@@ -410,11 +412,14 @@
                 try {
                     if (window.firebaseDb) {
                         const rsvpRef = ref(window.firebaseDb, 'rsvps');
-                        await push(rsvpRef, {
+                        const submitData = {
                             ...formData,
-                            guests: 1 + parseInt(formData.plusOnes || 0), // Maintain total guests count for compatibility in Dashboard
+                            attendingCeremony: formData.attending === 'yes' ? formData.attendingCeremony : false,
+                            attendingReception: formData.attending === 'yes' ? formData.attendingReception : false,
+                            guests: formData.attending === 'yes' ? (1 + parseInt(formData.plusOnes || 0)) : 0,
                             timestamp: new Date().toISOString()
-                        });
+                        };
+                        await push(rsvpRef, submitData);
                         setIsSuccess(true);
                     } else {
                         // Mock submission if Firebase is not configured
@@ -503,6 +508,40 @@
                                             </div>
                                         )}
                                     </div>
+
+                                    {formData.attending === 'yes' && (
+                                        <div className="p-6 bg-slate-100/50 rounded-xl border border-slate-200 mt-4 space-y-4">
+                                            <label className="block text-sm font-semibold text-slate-700">Which events will you attend?</label>
+                                            <div className="flex flex-col sm:flex-row gap-4 mt-2">
+                                                <label className="flex-1 flex items-center p-4 bg-white rounded-lg border border-slate-300 hover:border-slate-400 cursor-pointer transition-all shadow-sm">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        name="attendingCeremony" 
+                                                        checked={formData.attendingCeremony} 
+                                                        onChange={handleChange} 
+                                                        className="w-5 h-5 text-slate-800 border-slate-300 rounded focus:ring-slate-500 mr-3" 
+                                                    />
+                                                    <div>
+                                                        <span className="block font-medium text-sm text-slate-800">Church Wedding</span>
+                                                        <span className="block text-[11px] text-slate-500">2:00 PM • St. Peter's</span>
+                                                    </div>
+                                                </label>
+                                                <label className="flex-1 flex items-center p-4 bg-white rounded-lg border border-slate-300 hover:border-slate-400 cursor-pointer transition-all shadow-sm">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        name="attendingReception" 
+                                                        checked={formData.attendingReception} 
+                                                        onChange={handleChange} 
+                                                        className="w-5 h-5 text-slate-800 border-slate-300 rounded focus:ring-slate-500 mr-3" 
+                                                    />
+                                                    <div>
+                                                        <span className="block font-medium text-sm text-slate-800">Reception</span>
+                                                        <span className="block text-[11px] text-slate-500">6:00 PM • Il Villaggio</span>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {formData.attending === 'yes' && parseInt(formData.plusOnes || 0) > 0 && (
                                         <div className="p-6 bg-slate-100 rounded-xl border border-slate-200 mt-4 space-y-4">
@@ -664,6 +703,8 @@
             // Stats
             const totalYes = rsvps.filter(r => r.attending === 'yes').reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
             const totalNo = rsvps.filter(r => r.attending === 'no').length;
+            const totalCeremony = rsvps.filter(r => r.attending === 'yes' && r.attendingCeremony !== false).reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
+            const totalReception = rsvps.filter(r => r.attending === 'yes' && r.attendingReception !== false).reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
 
             return (
                 <div className="min-h-screen bg-slate-50 font-montserrat p-4 md:p-8">
@@ -680,20 +721,28 @@
                         </div>
 
                         {error && (
-                            <div className="bg-red-50 text-red-650 p-4 rounded-xl text-sm mb-6 border border-red-200 flex items-center justify-between">
+                            <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 border border-red-200 flex items-center justify-between">
                                 <span>{error}</span>
                                 <button onClick={() => setError('')} className="text-xs uppercase font-bold text-red-500 hover:text-red-700">Dismiss</button>
                             </div>
                         )}
 
-                        <div className="grid md:grid-cols-3 gap-6 mb-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
                                 <div className="p-3 bg-blue-50 text-blue-600 rounded-xl"><Users className="w-6 h-6" /></div>
-                                <div><p className="text-slate-500 text-sm font-medium">Total Responses</p><p className="text-2xl font-bold">{rsvps.length}</p></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Responses</p><p className="text-2xl font-bold">{rsvps.length}</p></div>
                             </div>
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
                                 <div className="p-3 bg-green-50 text-green-600 rounded-xl"><CheckCircle className="w-6 h-6" /></div>
-                                <div><p className="text-slate-500 text-sm font-medium">Total Attending (Headcount)</p><p className="text-2xl font-bold">{totalYes}</p></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Total Headcount</p><p className="text-2xl font-bold">{totalYes}</p></div>
+                            </div>
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                                <div className="p-3 bg-purple-50 text-purple-650 rounded-xl"><Church className="w-6 h-6" /></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Church Wedding</p><p className="text-2xl font-bold">{totalCeremony}</p></div>
+                            </div>
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                                <div className="p-3 bg-amber-50 text-amber-600 rounded-xl"><PartyPopper className="w-6 h-6" /></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Reception</p><p className="text-2xl font-bold">{totalReception}</p></div>
                             </div>
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
                                 <div className="p-3 bg-red-50 text-red-600 rounded-xl"><Lock className="w-6 h-6" /></div>
@@ -709,13 +758,14 @@
                                             <th className="p-4 font-semibold text-sm text-slate-600">Date</th>
                                             <th className="p-4 font-semibold text-sm text-slate-600">Name</th>
                                             <th className="p-4 font-semibold text-sm text-slate-600">Status</th>
+                                            <th className="p-4 font-semibold text-sm text-slate-600">Events</th>
                                             <th className="p-4 font-semibold text-sm text-slate-600">Plus Ones</th>
                                             <th className="p-4 font-semibold text-sm text-slate-600">Notes & Plus Ones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {rsvps.length === 0 ? (
-                                            <tr><td colSpan="5" className="p-8 text-center text-slate-500">No RSVPs yet.</td></tr>
+                                            <tr><td colSpan="6" className="p-8 text-center text-slate-500">No RSVPs yet.</td></tr>
                                         ) : (
                                             rsvps.map(rsvp => (
                                                 <tr key={rsvp.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
@@ -729,6 +779,18 @@
                                                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${rsvp.attending === 'yes' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                                             {rsvp.attending === 'yes' ? 'Attending' : 'Declined'}
                                                         </span>
+                                                    </td>
+                                                    <td className="p-4 text-xs font-medium">
+                                                        {rsvp.attending === 'yes' ? (
+                                                            <div className="space-y-1">
+                                                                <span className={`inline-block px-2 py-0.5 rounded mr-1 ${rsvp.attendingCeremony !== false ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400 line-through'}`}>
+                                                                    ⛪ Church
+                                                                </span>
+                                                                <span className={`inline-block px-2 py-0.5 rounded ${rsvp.attendingReception !== false ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400 line-through'}`}>
+                                                                    🥂 Reception
+                                                                </span>
+                                                            </div>
+                                                        ) : '-'}
                                                     </td>
                                                     <td className="p-4 text-sm text-slate-600">
                                                         {rsvp.attending === 'yes' ? (rsvp.plusOnes && parseInt(rsvp.plusOnes) > 0 ? `+${rsvp.plusOnes}` : '0') : '-'}
