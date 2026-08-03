@@ -392,6 +392,7 @@
                 plusOneName1: '',
                 plusOneName2: '',
                 attendingCeremony: true,
+                attendingCocktail: true,
                 attendingReception: true,
                 dietary: ''
             });
@@ -415,6 +416,7 @@
                         const submitData = {
                             ...formData,
                             attendingCeremony: formData.attending === 'yes' ? formData.attendingCeremony : false,
+                            attendingCocktail: formData.attending === 'yes' ? formData.attendingCocktail : false,
                             attendingReception: formData.attending === 'yes' ? formData.attendingReception : false,
                             guests: formData.attending === 'yes' ? (1 + parseInt(formData.plusOnes || 0)) : 0,
                             timestamp: new Date().toISOString()
@@ -512,8 +514,8 @@
                                     {formData.attending === 'yes' && (
                                         <div className="p-6 bg-slate-100/50 rounded-xl border border-slate-200 mt-4 space-y-4">
                                             <label className="block text-sm font-semibold text-slate-700">Which events will you attend?</label>
-                                            <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                                                <label className="flex-1 flex items-center p-4 bg-white rounded-lg border border-slate-300 hover:border-slate-400 cursor-pointer transition-all shadow-sm">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                                                <label className="flex items-center p-4 bg-white rounded-lg border border-slate-300 hover:border-slate-400 cursor-pointer transition-all shadow-sm">
                                                     <input 
                                                         type="checkbox" 
                                                         name="attendingCeremony" 
@@ -522,11 +524,24 @@
                                                         className="w-5 h-5 text-slate-800 border-slate-300 rounded focus:ring-slate-500 mr-3" 
                                                     />
                                                     <div>
-                                                        <span className="block font-medium text-sm text-slate-800">Church Wedding</span>
-                                                        <span className="block text-[11px] text-slate-500">2:00 PM • St. Peter's</span>
+                                                        <span className="block font-medium text-sm text-slate-800">Ceremony</span>
+                                                        <span className="block text-[11px] text-slate-500">2:00 PM • St. Peter the Apostle</span>
                                                     </div>
                                                 </label>
-                                                <label className="flex-1 flex items-center p-4 bg-white rounded-lg border border-slate-300 hover:border-slate-400 cursor-pointer transition-all shadow-sm">
+                                                <label className="flex items-center p-4 bg-white rounded-lg border border-slate-300 hover:border-slate-400 cursor-pointer transition-all shadow-sm">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        name="attendingCocktail" 
+                                                        checked={formData.attendingCocktail} 
+                                                        onChange={handleChange} 
+                                                        className="w-5 h-5 text-slate-800 border-slate-300 rounded focus:ring-slate-500 mr-3" 
+                                                    />
+                                                    <div>
+                                                        <span className="block font-medium text-sm text-slate-800">Cocktail Hour</span>
+                                                        <span className="block text-[11px] text-slate-500">6:00 PM • Il Villaggio</span>
+                                                    </div>
+                                                </label>
+                                                <label className="flex items-center p-4 bg-white rounded-lg border border-slate-300 hover:border-slate-400 cursor-pointer transition-all shadow-sm">
                                                     <input 
                                                         type="checkbox" 
                                                         name="attendingReception" 
@@ -536,7 +551,7 @@
                                                     />
                                                     <div>
                                                         <span className="block font-medium text-sm text-slate-800">Reception</span>
-                                                        <span className="block text-[11px] text-slate-500">6:00 PM • Il Villaggio</span>
+                                                        <span className="block text-[11px] text-slate-500">7:00 PM • Il Villaggio</span>
                                                     </div>
                                                 </label>
                                             </div>
@@ -698,12 +713,11 @@
                         </div>
                     </div>
                 );
-            }
-
-            // Stats
+               // Stats
             const totalYes = rsvps.filter(r => r.attending === 'yes').reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
             const totalNo = rsvps.filter(r => r.attending === 'no').length;
             const totalCeremony = rsvps.filter(r => r.attending === 'yes' && r.attendingCeremony !== false).reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
+            const totalCocktail = rsvps.filter(r => r.attending === 'yes' && r.attendingCocktail !== false).reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
             const totalReception = rsvps.filter(r => r.attending === 'yes' && r.attendingReception !== false).reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
 
             return (
@@ -727,26 +741,33 @@
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
                                 <div className="p-3 bg-blue-50 text-blue-600 rounded-xl"><Users className="w-6 h-6" /></div>
                                 <div><p className="text-slate-500 text-sm font-medium">Responses</p><p className="text-2xl font-bold">{rsvps.length}</p></div>
                             </div>
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
                                 <div className="p-3 bg-green-50 text-green-600 rounded-xl"><CheckCircle className="w-6 h-6" /></div>
-                                <div><p className="text-slate-500 text-sm font-medium">Total Headcount</p><p className="text-2xl font-bold">{totalYes}</p></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Total Attending (Headcount)</p><p className="text-2xl font-bold">{totalYes}</p></div>
                             </div>
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                                <div className="p-3 bg-purple-50 text-purple-650 rounded-xl"><Church className="w-6 h-6" /></div>
-                                <div><p className="text-slate-500 text-sm font-medium">Church Wedding</p><p className="text-2xl font-bold">{totalCeremony}</p></div>
+                                <div className="p-3 bg-red-50 text-red-600 rounded-xl"><Lock className="w-6 h-6" /></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Declined</p><p className="text-2xl font-bold">{totalNo}</p></div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                                <div className="p-3 bg-purple-50 text-purple-600 rounded-xl"><Church className="w-6 h-6" /></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Church Wedding Ceremony</p><p className="text-2xl font-bold">{totalCeremony}</p></div>
+                            </div>
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><Wine className="w-6 h-6" /></div>
+                                <div><p className="text-slate-500 text-sm font-medium">Cocktail Hour</p><p className="text-2xl font-bold">{totalCocktail}</p></div>
                             </div>
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
                                 <div className="p-3 bg-amber-50 text-amber-600 rounded-xl"><PartyPopper className="w-6 h-6" /></div>
                                 <div><p className="text-slate-500 text-sm font-medium">Reception</p><p className="text-2xl font-bold">{totalReception}</p></div>
-                            </div>
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                                <div className="p-3 bg-red-50 text-red-600 rounded-xl"><Lock className="w-6 h-6" /></div>
-                                <div><p className="text-slate-500 text-sm font-medium">Not Attending</p><p className="text-2xl font-bold">{totalNo}</p></div>
                             </div>
                         </div>
 
@@ -782,11 +803,14 @@
                                                     </td>
                                                     <td className="p-4 text-xs font-medium">
                                                         {rsvp.attending === 'yes' ? (
-                                                            <div className="space-y-1">
-                                                                <span className={`inline-block px-2 py-0.5 rounded mr-1 ${rsvp.attendingCeremony !== false ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400 line-through'}`}>
-                                                                    ⛪ Church
+                                                            <div className="flex flex-col gap-1">
+                                                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] w-max ${rsvp.attendingCeremony !== false ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400 line-through'}`}>
+                                                                    ⛪ Ceremony
                                                                 </span>
-                                                                <span className={`inline-block px-2 py-0.5 rounded ${rsvp.attendingReception !== false ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400 line-through'}`}>
+                                                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] w-max ${rsvp.attendingCocktail !== false ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400 line-through'}`}>
+                                                                    🍸 Cocktail
+                                                                </span>
+                                                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] w-max ${rsvp.attendingReception !== false ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400 line-through'}`}>
                                                                     🥂 Reception
                                                                 </span>
                                                             </div>
