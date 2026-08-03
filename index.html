@@ -713,7 +713,9 @@
                         </div>
                     </div>
                 );
-               // Stats
+            }
+
+            // Stats
             const totalYes = rsvps.filter(r => r.attending === 'yes').reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
             const totalNo = rsvps.filter(r => r.attending === 'no').length;
             const totalCeremony = rsvps.filter(r => r.attending === 'yes' && r.attendingCeremony !== false).reduce((acc, curr) => acc + parseInt(curr.guests || 0), 0);
