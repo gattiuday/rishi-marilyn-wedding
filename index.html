@@ -136,7 +136,7 @@
             measurementId: "G-PXJ0ZEDDS7"
         };
 
-        async function initFirebase() {
+        window.firebasePromise = (async function initFirebase() {
             try {
                 if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
                     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
@@ -152,12 +152,13 @@
                     window.firebaseAuth = auth;
                     window.firebaseDbFunctions = { ref, push, onValue };
                     window.firebaseAuthFunctions = { signInWithEmailAndPassword, onAuthStateChanged, signOut };
+                    return { database, auth, ref, push, onValue, signInWithEmailAndPassword, onAuthStateChanged, signOut };
                 }
             } catch (e) {
                 console.error("Firebase Initialization Error:", e);
             }
-        }
-        initFirebase();
+            return null;
+        })();
     </script>
 
     <script type="text/babel" data-type="module">
@@ -165,9 +166,34 @@
         import { createRoot } from 'react-dom/client';
         import { MapPin, Clock, Heart, ChefHat, Wine, Bed, Plane, CheckCircle, Users, LogOut, Lock, Church, PartyPopper, Calendar, Car, Info, Music, Volume2, VolumeX, ChevronDown, Hotel } from 'lucide-react';
 
-        // Safely extract Firebase functions or fall back if Firebase fails to load/is blocked
-        const { ref, push, onValue } = window.firebaseDbFunctions || {};
-        const { signInWithEmailAndPassword, onAuthStateChanged, signOut } = window.firebaseAuthFunctions || {};
+        // Safely forward Firebase database and auth functions even if dynamic import resolves asynchronously
+        const getDbFunc = (fnName) => (...args) => {
+            if (window.firebaseDbFunctions && typeof window.firebaseDbFunctions[fnName] === 'function') {
+                return window.firebaseDbFunctions[fnName](...args);
+            }
+            if (typeof window[fnName] === 'function') {
+                return window[fnName](...args);
+            }
+            throw new Error(`Firebase database is initializing or unavailable (${fnName}).`);
+        };
+
+        const getAuthFunc = (fnName) => (...args) => {
+            if (window.firebaseAuthFunctions && typeof window.firebaseAuthFunctions[fnName] === 'function') {
+                return window.firebaseAuthFunctions[fnName](...args);
+            }
+            if (typeof window[fnName] === 'function') {
+                return window[fnName](...args);
+            }
+            if (fnName === 'onAuthStateChanged') return () => {};
+            throw new Error(`Firebase auth is initializing or unavailable (${fnName}).`);
+        };
+
+        const ref = getDbFunc('ref');
+        const push = getDbFunc('push');
+        const onValue = getDbFunc('onValue');
+        const signInWithEmailAndPassword = getAuthFunc('signInWithEmailAndPassword');
+        const onAuthStateChanged = getAuthFunc('onAuthStateChanged');
+        const signOut = getAuthFunc('signOut');
 
         // ==========================================
         // COMPONENTS
@@ -411,8 +437,13 @@
                 setErrorMsg('');
                 
                 try {
-                    if (window.firebaseDb) {
-                        const rsvpRef = ref(window.firebaseDb, 'rsvps');
+                    if (window.firebasePromise) {
+                        await window.firebasePromise;
+                    }
+
+                    if (window.firebaseDb && window.firebaseDbFunctions?.ref && window.firebaseDbFunctions?.push) {
+                        const { ref: dbRef, push: dbPush } = window.firebaseDbFunctions;
+                        const rsvpRef = dbRef(window.firebaseDb, 'rsvps');
                         const submitData = {
                             ...formData,
                             attendingCeremony: formData.attending === 'yes' ? formData.attendingCeremony : false,
@@ -421,16 +452,16 @@
                             guests: formData.attending === 'yes' ? (1 + parseInt(formData.plusOnes || 0)) : 0,
                             timestamp: new Date().toISOString()
                         };
-                        await push(rsvpRef, submitData);
+                        await dbPush(rsvpRef, submitData);
                         setIsSuccess(true);
                     } else {
-                        // Mock submission if Firebase is not configured
-                        console.warn("Firebase not configured. Mocking submission.");
+                        // Mock submission if Firebase is not configured or blocked
+                        console.warn("Firebase not configured or unavailable. Mocking submission.");
                         setTimeout(() => setIsSuccess(true), 1000);
                     }
                 } catch (error) {
                     console.error("Error submitting RSVP:", error);
-                    setErrorMsg("There was an error saving your RSVP (" + error.message + "). Please try again.");
+                    setErrorMsg("There was an error saving your RSVP (" + (error.message || error) + "). Please try again.");
                 } finally {
                     setIsSubmitting(false);
                 }
@@ -605,26 +636,46 @@
             // Check Auth State
             useEffect(() => {
                 let unsubscribe = () => {};
-                if (window.firebaseAuth) {
-                    unsubscribe = onAuthStateChanged(window.firebaseAuth, (currentUser) => {
-                        if (currentUser) {
-                            setUser(currentUser);
-                            fetchRsvps();
-                        } else {
-                            setUser(prev => (prev && prev.isFallback ? prev : null));
-                        }
+                let isMounted = true;
+
+                const setupAuth = async () => {
+                    if (window.firebasePromise) {
+                        await window.firebasePromise;
+                    }
+                    if (!isMounted) return;
+
+                    if (window.firebaseAuth && window.firebaseAuthFunctions?.onAuthStateChanged) {
+                        unsubscribe = window.firebaseAuthFunctions.onAuthStateChanged(window.firebaseAuth, (currentUser) => {
+                            if (!isMounted) return;
+                            if (currentUser) {
+                                setUser(currentUser);
+                                fetchRsvps();
+                            } else {
+                                setUser(prev => (prev && prev.isFallback ? prev : null));
+                            }
+                            setLoading(false);
+                        });
+                    } else {
                         setLoading(false);
-                    });
-                } else {
-                    setLoading(false);
-                }
-                return () => unsubscribe();
+                    }
+                };
+
+                setupAuth();
+
+                return () => {
+                    isMounted = false;
+                    unsubscribe();
+                };
             }, []);
 
-            const fetchRsvps = () => {
-                if (!window.firebaseDb) return;
-                const rsvpRef = ref(window.firebaseDb, 'rsvps');
-                onValue(rsvpRef, (snapshot) => {
+            const fetchRsvps = async () => {
+                if (window.firebasePromise) {
+                    await window.firebasePromise;
+                }
+                if (!window.firebaseDb || !window.firebaseDbFunctions?.ref || !window.firebaseDbFunctions?.onValue) return;
+                const { ref: dbRef, onValue: dbOnValue } = window.firebaseDbFunctions;
+                const rsvpRef = dbRef(window.firebaseDb, 'rsvps');
+                dbOnValue(rsvpRef, (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
                         const rsvpList = Object.keys(data).map(key => ({
@@ -653,9 +704,12 @@
                 const lowerEmail = email.toLowerCase();
 
                 try {
-                    if (window.firebaseAuth) {
+                    if (window.firebasePromise) {
+                        await window.firebasePromise;
+                    }
+                    if (window.firebaseAuth && window.firebaseAuthFunctions?.signInWithEmailAndPassword) {
                         // Attempt real Firebase authentication first
-                        await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                        await window.firebaseAuthFunctions.signInWithEmailAndPassword(window.firebaseAuth, email, password);
                     } else {
                         throw new Error("Firebase Auth is not initialized.");
                     }
@@ -673,10 +727,13 @@
             };
 
             const handleLogout = async () => {
+                if (window.firebasePromise) {
+                    await window.firebasePromise;
+                }
                 if (user && user.isFallback) {
                     setUser(null);
-                } else if (window.firebaseAuth) {
-                    await signOut(window.firebaseAuth);
+                } else if (window.firebaseAuth && window.firebaseAuthFunctions?.signOut) {
+                    await window.firebaseAuthFunctions.signOut(window.firebaseAuth);
                 } else {
                     setUser(null);
                 }
