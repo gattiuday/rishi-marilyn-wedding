@@ -428,7 +428,17 @@
 
             const handleChange = (e) => {
                 const { name, value, type, checked } = e.target;
-                setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+                if (name === 'attending' && value === 'no') {
+                    setFormData(prev => ({ 
+                        ...prev, 
+                        attending: 'no', 
+                        plusOnes: '0', 
+                        plusOneName1: '', 
+                        plusOneName2: '' 
+                    }));
+                } else {
+                    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+                }
             };
 
             const handleSubmit = async (e) => {
@@ -444,12 +454,16 @@
                     if (window.firebaseDb && window.firebaseDbFunctions?.ref && window.firebaseDbFunctions?.push) {
                         const { ref: dbRef, push: dbPush } = window.firebaseDbFunctions;
                         const rsvpRef = dbRef(window.firebaseDb, 'rsvps');
+                        const plusOnesCount = formData.attending === 'yes' ? parseInt(formData.plusOnes || 0) : 0;
                         const submitData = {
                             ...formData,
+                            plusOnes: plusOnesCount.toString(),
+                            plusOneName1: plusOnesCount > 0 ? formData.plusOneName1 : '',
+                            plusOneName2: plusOnesCount > 1 ? formData.plusOneName2 : '',
                             attendingCeremony: formData.attending === 'yes' ? formData.attendingCeremony : false,
                             attendingCocktail: formData.attending === 'yes' ? formData.attendingCocktail : false,
                             attendingReception: formData.attending === 'yes' ? formData.attendingReception : false,
-                            guests: formData.attending === 'yes' ? (1 + parseInt(formData.plusOnes || 0)) : 0,
+                            guests: formData.attending === 'yes' ? (1 + plusOnesCount) : 0,
                             timestamp: new Date().toISOString()
                         };
                         await dbPush(rsvpRef, submitData);
