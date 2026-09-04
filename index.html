@@ -441,41 +441,83 @@
                 }
             };
 
+            const postToFirebaseRest = async (data, timeoutMs = 8000) => {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    const response = await fetch("https://rishi-wedding-default-rtdb.firebaseio.com/rsvps.json", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    if (!response.ok) {
+                        throw new Error("Server returned HTTP " + response.status);
+                    }
+                    return await response.json();
+                } catch (err) {
+                    clearTimeout(timeoutId);
+                    throw err;
+                }
+            };
+
             const handleSubmit = async (e) => {
                 e.preventDefault();
                 setIsSubmitting(true);
                 setErrorMsg('');
                 
                 try {
-                    if (window.firebasePromise) {
-                        await window.firebasePromise;
+                    const plusOnesCount = formData.attending === 'yes' ? parseInt(formData.plusOnes || 0) : 0;
+                    const submitData = {
+                        ...formData,
+                        plusOnes: plusOnesCount.toString(),
+                        plusOneName1: plusOnesCount > 0 ? formData.plusOneName1 : '',
+                        plusOneName2: plusOnesCount > 1 ? formData.plusOneName2 : '',
+                        attendingCeremony: formData.attending === 'yes' ? formData.attendingCeremony : false,
+                        attendingCocktail: formData.attending === 'yes' ? formData.attendingCocktail : false,
+                        attendingReception: formData.attending === 'yes' ? formData.attendingReception : false,
+                        guests: formData.attending === 'yes' ? (1 + plusOnesCount) : 0,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    let saved = false;
+
+                    // 1. Direct fast HTTPS REST POST (reliable on all mobile browsers, works with ad blockers & spotty signal)
+                    try {
+                        await postToFirebaseRest(submitData, 8000);
+                        saved = true;
+                    } catch (restErr) {
+                        console.warn("Direct REST save failed, attempting SDK save:", restErr);
                     }
 
-                    if (window.firebaseDb && window.firebaseDbFunctions?.ref && window.firebaseDbFunctions?.push) {
-                        const { ref: dbRef, push: dbPush } = window.firebaseDbFunctions;
-                        const rsvpRef = dbRef(window.firebaseDb, 'rsvps');
-                        const plusOnesCount = formData.attending === 'yes' ? parseInt(formData.plusOnes || 0) : 0;
-                        const submitData = {
-                            ...formData,
-                            plusOnes: plusOnesCount.toString(),
-                            plusOneName1: plusOnesCount > 0 ? formData.plusOneName1 : '',
-                            plusOneName2: plusOnesCount > 1 ? formData.plusOneName2 : '',
-                            attendingCeremony: formData.attending === 'yes' ? formData.attendingCeremony : false,
-                            attendingCocktail: formData.attending === 'yes' ? formData.attendingCocktail : false,
-                            attendingReception: formData.attending === 'yes' ? formData.attendingReception : false,
-                            guests: formData.attending === 'yes' ? (1 + plusOnesCount) : 0,
-                            timestamp: new Date().toISOString()
-                        };
-                        await dbPush(rsvpRef, submitData);
-                        setIsSuccess(true);
-                    } else {
-                        // Mock submission if Firebase is not configured or blocked
-                        console.warn("Firebase not configured or unavailable. Mocking submission.");
-                        setTimeout(() => setIsSuccess(true), 1000);
+                    // 2. Fallback to Firebase SDK push if REST failed, with an explicit 8s timeout
+                    if (!saved) {
+                        const sdkPromise = (async () => {
+                            if (window.firebasePromise) {
+                                await window.firebasePromise;
+                            }
+                            if (window.firebaseDb && window.firebaseDbFunctions?.ref && window.firebaseDbFunctions?.push) {
+                                const { ref: dbRef, push: dbPush } = window.firebaseDbFunctions;
+                                const rsvpRef = dbRef(window.firebaseDb, 'rsvps');
+                                await dbPush(rsvpRef, submitData);
+                                return true;
+                            }
+                            return false;
+                        })();
+
+                        const timeoutPromise = new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error("Connection timed out")), 8000)
+                        );
+
+                        await Promise.race([sdkPromise, timeoutPromise]);
+                        saved = true;
                     }
+
+                    setIsSuccess(true);
                 } catch (error) {
                     console.error("Error submitting RSVP:", error);
-                    setErrorMsg("There was an error saving your RSVP (" + (error.message || error) + "). Please try again.");
+                    setErrorMsg("Unable to save your RSVP (" + (error.message || error) + "). Please try again.");
                 } finally {
                     setIsSubmitting(false);
                 }
@@ -683,33 +725,60 @@
             }, []);
 
             const fetchRsvps = async () => {
-                if (window.firebasePromise) {
-                    await window.firebasePromise;
-                }
-                if (!window.firebaseDb || !window.firebaseDbFunctions?.ref || !window.firebaseDbFunctions?.onValue) return;
-                const { ref: dbRef, onValue: dbOnValue } = window.firebaseDbFunctions;
-                const rsvpRef = dbRef(window.firebaseDb, 'rsvps');
-                dbOnValue(rsvpRef, (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        const rsvpList = Object.keys(data).map(key => ({
-                            id: key,
-                            ...data[key]
-                        }));
-                        // Sort newest first safely
-                        rsvpList.sort((a,b) => {
-                            const dateA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-                            const dateB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-                            return dateB - dateA;
-                        });
-                        setRsvps(rsvpList);
-                    } else {
-                        setRsvps([]);
+                // 1. Fetch immediately via HTTPS REST endpoint
+                try {
+                    const res = await fetch("https://rishi-wedding-default-rtdb.firebaseio.com/rsvps.json");
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data) {
+                            const rsvpList = Object.keys(data).map(key => ({
+                                id: key,
+                                ...data[key]
+                            }));
+                            rsvpList.sort((a,b) => {
+                                const dateA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+                                const dateB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+                                return dateB - dateA;
+                            });
+                            setRsvps(rsvpList);
+                        } else {
+                            setRsvps([]);
+                        }
                     }
-                }, (error) => {
-                    console.error("Error fetching RSVPs:", error);
-                    setError("Failed to fetch RSVPs from database: " + error.message);
-                });
+                } catch (restErr) {
+                    console.warn("Direct REST fetch for RSVPs failed:", restErr);
+                }
+
+                // 2. Attach realtime database listener if SDK is available
+                try {
+                    if (window.firebasePromise) {
+                        await window.firebasePromise;
+                    }
+                    if (!window.firebaseDb || !window.firebaseDbFunctions?.ref || !window.firebaseDbFunctions?.onValue) return;
+                    const { ref: dbRef, onValue: dbOnValue } = window.firebaseDbFunctions;
+                    const rsvpRef = dbRef(window.firebaseDb, 'rsvps');
+                    dbOnValue(rsvpRef, (snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            const rsvpList = Object.keys(data).map(key => ({
+                                id: key,
+                                ...data[key]
+                            }));
+                            rsvpList.sort((a,b) => {
+                                const dateA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+                                const dateB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+                                return dateB - dateA;
+                            });
+                            setRsvps(rsvpList);
+                        } else {
+                            setRsvps([]);
+                        }
+                    }, (error) => {
+                        console.error("Realtime listener error:", error);
+                    });
+                } catch (sdkErr) {
+                    console.warn("Firebase SDK realtime listener setup failed:", sdkErr);
+                }
             };
 
             const handleLogin = async (e) => {
