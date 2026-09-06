@@ -283,12 +283,13 @@
                             <h2 className="font-playfair text-4xl text-slate-800 italic">Travel & Details</h2>
                         </div>
                         
-                        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                             {/* Ceremony */}
                             <div className="glass-panel p-8 rounded-2xl text-center flex flex-col justify-between hover:shadow-lg transition-shadow">
                                 <div>
                                     <Church className="w-8 h-8 text-slate-600 mx-auto mb-4" />
-                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-3 text-slate-500">Ceremony</h3>
+                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-1 text-slate-500">Ceremony</h3>
+                                    <p className="text-xs font-semibold text-slate-500 mb-2">2:00 PM</p>
                                     <p className="font-playfair text-xl text-slate-900 mb-2">St. Peter the Apostle</p>
                                     <p className="text-slate-600 text-sm mb-4">94 Somerset St<br/>New Brunswick, NJ 08901</p>
                                 </div>
@@ -302,11 +303,31 @@
                                 </a>
                             </div>
 
+                            {/* Cocktail Hour */}
+                            <div className="glass-panel p-8 rounded-2xl text-center flex flex-col justify-between hover:shadow-lg transition-shadow">
+                                <div>
+                                    <Wine className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-1 text-slate-500">Cocktail Hour</h3>
+                                    <p className="text-xs font-semibold text-slate-500 mb-2">6:00 PM - 7:00 PM</p>
+                                    <p className="font-playfair text-xl text-slate-900 mb-2">Il Villaggio</p>
+                                    <p className="text-slate-600 text-sm mb-4">651 NJ-17 N<br/>Carlstadt, NJ 07072</p>
+                                </div>
+                                <a 
+                                    href="https://maps.google.com/?q=Il+Villaggio,+651+NJ-17+N,+Carlstadt,+NJ+07072" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="inline-block mt-4 text-xs font-cinzel text-slate-700 hover:text-slate-900 tracking-widest uppercase border border-slate-350 px-4 py-2 rounded-full hover:bg-slate-50 transition-colors"
+                                >
+                                    Get Directions
+                                </a>
+                            </div>
+
                             {/* Reception */}
                             <div className="glass-panel p-8 rounded-2xl text-center flex flex-col justify-between hover:shadow-lg transition-shadow">
                                 <div>
                                     <PartyPopper className="w-8 h-8 text-slate-600 mx-auto mb-4" />
-                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-3 text-slate-500">Reception</h3>
+                                    <h3 className="font-cinzel font-bold text-sm tracking-wider uppercase mb-1 text-slate-500">Reception</h3>
+                                    <p className="text-xs font-semibold text-slate-500 mb-2">7:00 PM - 11:00 PM</p>
                                     <p className="font-playfair text-xl text-slate-900 mb-2">Il Villaggio</p>
                                     <p className="text-slate-600 text-sm mb-4">651 NJ-17 N<br/>Carlstadt, NJ 07072</p>
                                 </div>
