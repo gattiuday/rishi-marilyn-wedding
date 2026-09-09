@@ -164,7 +164,7 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { MapPin, Clock, Heart, ChefHat, Wine, Bed, Plane, CheckCircle, Users, LogOut, Lock, Church, PartyPopper, Calendar, Car, Info, Music, Volume2, VolumeX, ChevronDown, Hotel } from 'lucide-react';
+        import { MapPin, Clock, Heart, ChefHat, Wine, Bed, Plane, CheckCircle, Users, LogOut, Lock, Church, PartyPopper, Calendar, Car, Info, Music, Volume2, VolumeX, ChevronDown, Hotel, Download } from 'lucide-react';
 
         // Safely forward Firebase database and auth functions even if dynamic import resolves asynchronously
         const getDbFunc = (fnName) => (...args) => {
@@ -843,6 +843,75 @@
                 }
             };
 
+            const exportToExcel = () => {
+                if (!rsvps || rsvps.length === 0) {
+                    alert("No RSVPs available to export.");
+                    return;
+                }
+
+                const headers = [
+                    "Submission Date",
+                    "Full Name",
+                    "Email Address",
+                    "Phone Number",
+                    "Status",
+                    "Total Headcount",
+                    "Plus Ones Count",
+                    "Plus One Names",
+                    "Church Ceremony",
+                    "Cocktail Hour",
+                    "Reception",
+                    "Dietary & Notes"
+                ];
+
+                const escapeCsv = (val) => {
+                    const str = String(val === null || val === undefined ? '' : val);
+                    return `"${str.replace(/"/g, '""')}"`;
+                };
+
+                const rows = rsvps.map(rsvp => {
+                    const dateStr = rsvp.timestamp ? new Date(rsvp.timestamp).toLocaleString('en-US') : '';
+                    const isAttending = rsvp.attending === 'yes';
+                    const ceremony = isAttending ? (rsvp.attendingCeremony !== false ? 'Yes' : 'No') : 'No';
+                    const cocktail = isAttending ? (rsvp.attendingCocktail !== false ? 'Yes' : 'No') : 'No';
+                    const reception = isAttending ? (rsvp.attendingReception !== false ? 'Yes' : 'No') : 'No';
+                    const plusOnes = isAttending ? (rsvp.plusOnes || '0') : '0';
+                    const plusOneNames = isAttending ? [rsvp.plusOneName1, rsvp.plusOneName2].filter(Boolean).join(", ") : '';
+                    const guestsCount = isAttending ? (rsvp.guests || (1 + parseInt(rsvp.plusOnes || 0))) : 0;
+
+                    return [
+                        dateStr,
+                        rsvp.name || '',
+                        rsvp.email || '',
+                        rsvp.phone || '',
+                        isAttending ? 'Attending' : 'Declined',
+                        guestsCount,
+                        plusOnes,
+                        plusOneNames,
+                        ceremony,
+                        cocktail,
+                        reception,
+                        rsvp.dietary || ''
+                    ];
+                });
+
+                const csvContent = "\uFEFF" + [
+                    headers.map(escapeCsv).join(","),
+                    ...rows.map(row => row.map(escapeCsv).join(","))
+                ].join("\r\n");
+
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                const dateTag = new Date().toISOString().slice(0, 10);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `Wedding_RSVP_List_${dateTag}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
             if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50">Loading...</div>;
 
             if (!user) {
@@ -886,15 +955,25 @@
             return (
                 <div className="min-h-screen bg-slate-50 font-montserrat p-4 md:p-8">
                     <div className="max-w-6xl mx-auto">
-                        <div className="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                             <div>
                                 <h1 className="text-2xl font-bold text-slate-800">RSVP Dashboard</h1>
                                 <p className="text-slate-500 text-sm">Real-time attendance tracking</p>
                             </div>
-                            <button onClick={handleLogout} className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 bg-slate-100 px-4 py-2 rounded-lg">
-                                <LogOut className="w-4 h-4" />
-                                <span>Sign Out</span>
-                            </button>
+                            <div className="flex items-center space-x-3">
+                                <button 
+                                    onClick={exportToExcel} 
+                                    className="flex items-center space-x-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-sm cursor-pointer"
+                                    title="Export all RSVPs to Excel / CSV spreadsheet"
+                                >
+                                    <Download className="w-4 h-4" />
+                                    <span>Export to Excel</span>
+                                </button>
+                                <button onClick={handleLogout} className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors cursor-pointer">
+                                    <LogOut className="w-4 h-4" />
+                                    <span>Sign Out</span>
+                                </button>
+                            </div>
                         </div>
 
                         {error && (
